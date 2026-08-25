@@ -43,27 +43,29 @@ tool_node = ToolNode(all_tools)
 
 def search_agent(state: ResearchState) -> dict:
     current_search_count = state.get("search_count", 0) + 1
-    topics = state.get("missing_topics") or state.get("topics", [])
+    existing_docs_count = len(state.get("documents", []))
 
+    topics = state.get("missing_topics") or state.get("topics", [])
     if not topics:
         return {"documents": [], "new_documents": []}
 
     system_message = SystemMessage(content=SEARCH_AGENT_PROMPT)
     user_message = HumanMessage(content=f"Research these topics:\n{topics}")
+    messages = [system_message, user_message]
 
-    response = llm_with_tools.invoke([system_message, user_message])
+    response = llm_with_tools.invoke(messages)
     new_documents = []
 
     if hasattr(response, "tool_calls") and response.tool_calls:
-        tool_result = tool_node.invoke({"messages": [response]})
-        new_documents = [
-            extract_text(message.content)
-            for message in tool_result["messages"]
-            if message.content
-        ]
-        new_documents = [doc for doc in new_documents if doc]
-    else:
-        print("\n⚠ Search Agent didn't call any tools.")
+        messages.append(response)
+        tool_result = tool_node.invoke({"messages": messages})
+
+        counter = existing_docs_count
+        for message in tool_result["messages"]:
+            if isinstance(message, ToolMessage) and message.content:
+                extracted = extract_documents(message.content, counter)
+                counter += len(extracted)
+                new_documents.extend(extracted)
 
     return {
         "documents": new_documents,

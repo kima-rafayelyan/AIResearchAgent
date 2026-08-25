@@ -12,31 +12,32 @@ def document_analyzer(state: ResearchState) -> dict:
 
     print(f"\nAnalyzing {len(documents)} new documents in parallel...")
 
-    def summarize_doc(item: tuple[int, str]) -> str:
-        i, doc = item
+    def summarize_doc(doc: SourceDocument) -> DocumentSummary:
         prompt = f"""
-You are a Document Analysis Agent in a research system.
-Analyze the research document below.
+You are a Document Analysis Agent.
+Analyze the document below and summarize the key findings.
 
-Your summary must:
-- Be concise and fact-based.
-- Identify main ideas, important findings, technical details, definitions, or evidence.
-- Avoid unsupported claims.
+ID: {doc['doc_id']}
+Title: {doc['title']}
+URL: {doc['url']}
+Source: {doc['source_type']}
 
-DOCUMENT:
-{doc}
+Content:
+{doc['content']}
+
 
 Return ONLY the summary.
 """
         try:
             response = llm.invoke(prompt)
             summary = extract_text(response.content)
-            if summary:
-                print(f"  ✓ Document {i} summarized")
-                return summary
-            else:
-                print(f"  ⚠ Document {i} produced an empty summary")
-                return ""
+            return {
+                "doc_id": doc["doc_id"],
+                "title": doc["title"],
+                "url": doc["url"],
+                "source": doc["source"],
+                "summary": summary_text
+            }
         except Exception as e:
             print(f"  ✗ Failed to summarize document {i}: {e}")
             return ""
