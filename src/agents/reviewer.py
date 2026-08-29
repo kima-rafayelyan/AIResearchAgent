@@ -69,15 +69,27 @@ Each missing topic must be specific enough to search on the web.
 
     reviewer_llm = llm.with_structured_output(QualityReview)
 
-    try:
-        result = reviewer_llm.invoke(prompt)
-    except Exception as e:
-        print(f"\n❌ Reviewer call failed: {e}")
+    result = None
+    last_error = None
+    for attempt in range(2):
+        try:
+            result = reviewer_llm.invoke(prompt)
+            break
+        except Exception as e:
+            last_error = e
+            print(f"\n⚠ Reviewer call failed (attempt {attempt + 1}/2): {e}")
+
+    if result is None:
+        print(f"\n❌ Reviewer failed after retries: {last_error}")
         return {
-            "quality_score": 0.0,
-            "need_more_search": True,
-            "missing_topics": topics,
-            "review_feedback": f"Reviewer call failed: {e}",
+            "quality_score": state.get("quality_score", 0.0),
+            "need_more_search": False,
+            "missing_topics": [],
+            "review_feedback": (
+                f"Quality review could not be completed after retries "
+                f"({last_error}). Proceeding to the final report with the "
+                f"research collected so far; quality was not verified."
+            ),
         }
 
     quality_score = max(0.0, min(1.0, float(result.quality_score)))

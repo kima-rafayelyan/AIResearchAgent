@@ -1,7 +1,9 @@
+import json
 import arxiv
+import wikipedia
 import wikipediaapi
 from langchain_core.tools import Tool, tool
-#from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_tavily import TavilySearch
 
 wiki_api = wikipediaapi.Wikipedia(
     user_agent="MyResearchAgent/1.0 (contact@yourdomain.com)",
@@ -10,9 +12,19 @@ wiki_api = wikipediaapi.Wikipedia(
 
 def wikipedia_search(query: str) -> str:
     try:
-        page = wiki_api.page(query)
+        # Step 1: Search for the best matching article title
+        search_results = wikipedia.search(query)
+        if not search_results:
+            return json.dumps({"error": f"No Wikipedia page found for '{query}'."})
+        
+        # Select the top hit title
+        best_title = search_results[0]
+        
+        # Step 2: Fetch the page using wikipediaapi
+        page = wiki_api.page(best_title)
         if not page.exists():
             return json.dumps({"error": f"No Wikipedia page found for '{query}'."})
+            
         return json.dumps({
             "title": page.title,
             "url": page.fullurl,
@@ -50,9 +62,6 @@ def arxiv_tool(query: str) -> str:
     except Exception as e:
         return json.dumps({"error": f"ArXiv search failed: {e}"})
 
-
-
-from langchain_tavily import TavilySearch
 
 tavily_tool = TavilySearch(max_results=5)
 

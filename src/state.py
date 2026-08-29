@@ -28,3 +28,4 @@ class ResearchState(TypedDict):
     review_feedback: str
     final_report: str
     search_count: int
+    max_search_iterations: int

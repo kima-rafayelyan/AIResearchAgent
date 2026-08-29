@@ -1,46 +1,68 @@
 from typing import Any
 
-    def extract_documents(content: Any, start_idx: int) -> List[SourceDocument]:
+def extract_text(content: Any) -> str:
+    if content is None:
+        return ""
+
+    if isinstance(content, str):
+        return content.strip()
+
+    if isinstance(content, list):
+        parts = []
+        for item in content:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict):
+                text = item.get("text") or item.get("content") or ""
+                if isinstance(text, str):
+                    parts.append(text)
+        return "\n".join(part.strip() for part in parts if part and part.strip())
+
+    return str(content).strip()
+    
+    
+import json
+from typing import List, Any
+from src.state import SourceDocument
+
+def extract_documents(content: Any, start_idx: int) -> List[SourceDocument]:
     docs = []
     if not content:
         return docs
-        
+
     try:
-        if isinstance(content, str):
-            parsed = json.loads(content)
-        else:
-            parsed = content
+        parsed = json.loads(content) if isinstance(content, str) else content
+
+        # Tavily's TavilySearch tool returns a wrapper dict like
+        # {"query": ..., "results": [...], "answer": ..., ...} instead of a
+        # bare list. Unwrap it so we process the individual results, not the
+        # wrapper itself.
+        if isinstance(parsed, dict) and isinstance(parsed.get("results"), list):
+            parsed = parsed["results"]
 
         items = parsed if isinstance(parsed, list) else [parsed]
-        
+
         for item in items:
-            if isinstance(item, dict) and "content" in item:
-                start_idx += 1
-                docs.append({
-                    "doc_id": f"doc_{start_idx}",
-                    "title": item.get("title", "Untitled"),
-                    "url": item.get("url") or item.get("url", "N/A"),
-                    "source": item.get("source", "Web"),
-                    "content": item.get("content", "")
-                })
-            elif isinstance(item, dict) and "raw_content" in item: 
-                start_idx += 1
-                docs.append({
-                    "doc_id": f"doc_{start_idx}",
-                    "title": item.get("title", "Web Result"),
-                    "url": item.get("url", "N/A"),
-                    "source": "Tavily Search",
-                    "content": item.get("content") or item.get("raw_content", "")
-                })
+            if not isinstance(item, dict) or "error" in item:
+                continue
+            start_idx += 1
+            # Check varying schema keys from Tavily, Wikipedia, ArXiv
+            docs.append({
+                "doc_id": f"doc_{start_idx}",
+                "title": item.get("title") or item.get("heading") or f"Document {start_idx}",
+                "url": item.get("url") or item.get("link") or "N/A",
+                "source": item.get("source") or item.get("source_type") or "Web Search",
+                "content": item.get("content") or item.get("raw_content") or item.get("summary") or ""
+            })
     except Exception:
         if isinstance(content, str) and content.strip():
             start_idx += 1
             docs.append({
                 "doc_id": f"doc_{start_idx}",
-                "title": "Text Snippet",
+                "title": f"Web Source {start_idx}",
                 "url": "N/A",
-                "source": "Unknown",
+                "source": "Web",
                 "content": content.strip()
             })
-            
+
     return docs

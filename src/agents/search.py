@@ -1,9 +1,9 @@
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from langgraph.prebuilt import ToolNode
 from src.state import ResearchState
-from src.agents import llm_with_tools
+from src.agents import llm_with_tools, llm_with_tools_forced
 from src.tools import all_tools
-from src.utils import extract_text
+from src.utils import extract_text, extract_documents
 
 SEARCH_AGENT_PROMPT = """
 You are a Search Agent.
@@ -37,9 +37,18 @@ Rules:
 - You may call multiple tools.
 - You may call the same tool multiple times if necessary.
 - Select the most appropriate tool for each topic.
+- After reviewing tool results, if important topics are still uncovered,
+  call more tools before you're done. Only stop once every topic has
+  meaningful coverage.
 """
 
 tool_node = ToolNode(all_tools)
+
+# Caps the inner tool-calling loop for a single search_agent invocation.
+# Without a bound, a model that keeps deciding "I should search once more"
+# could loop indefinitely; this keeps that bounded and predictable while
+# still allowing several rounds of follow-up searching.
+MAX_REACT_STEPS = 4
 
 def search_agent(state: ResearchState) -> dict:
     current_search_count = state.get("search_count", 0) + 1
@@ -47,25 +56,49 @@ def search_agent(state: ResearchState) -> dict:
 
     topics = state.get("missing_topics") or state.get("topics", [])
     if not topics:
-        return {"documents": [], "new_documents": []}
+        return {"documents": [], "new_documents": [], "search_count": current_search_count}
 
     system_message = SystemMessage(content=SEARCH_AGENT_PROMPT)
     user_message = HumanMessage(content=f"Research these topics:\n{topics}")
     messages = [system_message, user_message]
 
-    response = llm_with_tools.invoke(messages)
     new_documents = []
+    counter = existing_docs_count
 
-    if hasattr(response, "tool_calls") and response.tool_calls:
+    for step in range(MAX_REACT_STEPS):
+        # Force a tool call on the very first turn only; after that, let the
+        # model see its own tool results and decide for itself whether to
+        # search again or stop. This is what makes it an actual ReAct loop
+        # instead of a single tool-call that the model never sees the result
+        # of.
+        model = llm_with_tools_forced if step == 0 else llm_with_tools
+        response = model.invoke(messages)
         messages.append(response)
-        tool_result = tool_node.invoke({"messages": messages})
 
-        counter = existing_docs_count
-        for message in tool_result["messages"]:
+        if not (hasattr(response, "tool_calls") and response.tool_calls):
+            if step == 0:
+                print("\n⚠ Search Agent didn't call any tools for these topics:")
+                for t in topics:
+                    print(f"  - {t}")
+            else:
+                print(f"\n✓ Search Agent stopped after {step} round(s) of tool calls (model judged coverage sufficient).")
+            break
+
+        tool_result = tool_node.invoke({"messages": messages})
+        tool_messages = tool_result["messages"]
+        messages.extend(tool_messages)
+
+        step_doc_count = 0
+        for message in tool_messages:
             if isinstance(message, ToolMessage) and message.content:
                 extracted = extract_documents(message.content, counter)
                 counter += len(extracted)
+                step_doc_count += len(extracted)
                 new_documents.extend(extracted)
+
+        print(f"  Round {step + 1}/{MAX_REACT_STEPS}: {len(tool_messages)} tool call(s) -> {step_doc_count} document(s)")
+    else:
+        print(f"\n⚠ Search Agent hit the {MAX_REACT_STEPS}-round cap; stopping with what's been gathered so far.")
 
     return {
         "documents": new_documents,
