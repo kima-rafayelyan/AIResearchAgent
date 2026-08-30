@@ -110,12 +110,4 @@ AIResearchAgent/
 - The reviewer's pass threshold is a `quality_score >= 0.85`; anything lower triggers another search round (subject to the iteration cap above).
 - The app uses OpenRouter as an OpenAI-compatible endpoint, so `OPENROUTER_MODEL` can be swapped for any model OpenRouter supports (e.g. other Gemini, Claude, or GPT variants) without code changes.
 
-## Known limitations
 
-- No persistence — each run starts fresh; past reports aren't saved.
-- No automated tests yet.
-- Missing/invalid API keys currently surface as raw stack traces rather than a friendly error message.
-
-## License
-
-Add your license here.
