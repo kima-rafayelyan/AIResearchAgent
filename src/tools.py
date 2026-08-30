@@ -12,15 +12,15 @@ wiki_api = wikipediaapi.Wikipedia(
 
 def wikipedia_search(query: str) -> str:
     try:
-        # Step 1: Search for the best matching article title
+
         search_results = wikipedia.search(query)
         if not search_results:
             return json.dumps({"error": f"No Wikipedia page found for '{query}'."})
         
-        # Select the top hit title
+
         best_title = search_results[0]
         
-        # Step 2: Fetch the page using wikipediaapi
+
         page = wiki_api.page(best_title)
         if not page.exists():
             return json.dumps({"error": f"No Wikipedia page found for '{query}'."})

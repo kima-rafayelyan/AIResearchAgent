@@ -44,10 +44,7 @@ Rules:
 
 tool_node = ToolNode(all_tools)
 
-# Caps the inner tool-calling loop for a single search_agent invocation.
-# Without a bound, a model that keeps deciding "I should search once more"
-# could loop indefinitely; this keeps that bounded and predictable while
-# still allowing several rounds of follow-up searching.
+
 MAX_REACT_STEPS = 4
 
 def search_agent(state: ResearchState) -> dict:
@@ -66,11 +63,7 @@ def search_agent(state: ResearchState) -> dict:
     counter = existing_docs_count
 
     for step in range(MAX_REACT_STEPS):
-        # Force a tool call on the very first turn only; after that, let the
-        # model see its own tool results and decide for itself whether to
-        # search again or stop. This is what makes it an actual ReAct loop
-        # instead of a single tool-call that the model never sees the result
-        # of.
+
         model = llm_with_tools_forced if step == 0 else llm_with_tools
         response = model.invoke(messages)
         messages.append(response)

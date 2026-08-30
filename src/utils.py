@@ -33,10 +33,6 @@ def extract_documents(content: Any, start_idx: int) -> List[SourceDocument]:
     try:
         parsed = json.loads(content) if isinstance(content, str) else content
 
-        # Tavily's TavilySearch tool returns a wrapper dict like
-        # {"query": ..., "results": [...], "answer": ..., ...} instead of a
-        # bare list. Unwrap it so we process the individual results, not the
-        # wrapper itself.
         if isinstance(parsed, dict) and isinstance(parsed.get("results"), list):
             parsed = parsed["results"]
 
@@ -46,7 +42,7 @@ def extract_documents(content: Any, start_idx: int) -> List[SourceDocument]:
             if not isinstance(item, dict) or "error" in item:
                 continue
             start_idx += 1
-            # Check varying schema keys from Tavily, Wikipedia, ArXiv
+
             docs.append({
                 "doc_id": f"doc_{start_idx}",
                 "title": item.get("title") or item.get("heading") or f"Document {start_idx}",

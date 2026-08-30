@@ -11,7 +11,7 @@ st.set_page_config(
 st.title("🔍 Multi-Agent Deep Research System")
 st.caption("Powered by LangGraph, Google Gemini, Tavily, Wikipedia & ArXiv")
 
-# Sidebar Configuration
+
 with st.sidebar:
     st.header("Settings")
     max_iterations = st.number_input(
@@ -31,7 +31,6 @@ with st.sidebar:
     5. **Final Reporter**: Compiles research paper.
     """)
 
-# Query Input
 query = st.text_input(
     "Enter your research query:",
     placeholder="e.g., Explain the architecture and capabilities of DeepSeek-V3"
@@ -39,8 +38,7 @@ query = st.text_input(
 
 run_button = st.button("Start Research", type="primary", use_container_width=True)
 
-# Persist results across reruns (e.g. touching a sidebar widget) instead of
-# keeping them in plain local variables, which get wiped on every rerun.
+
 if "topics" not in st.session_state:
     st.session_state.topics = []
 if "summaries" not in st.session_state:
@@ -53,7 +51,6 @@ if "run_complete" not in st.session_state:
     st.session_state.run_complete = False
 
 if run_button and query:
-    # Starting a fresh run: clear out any previous run's results.
     st.session_state.topics = []
     st.session_state.summaries = []
     st.session_state.review = None
@@ -75,7 +72,7 @@ if run_button and query:
         "max_search_iterations": max_iterations,
     }
 
-    # UI Containers for Live Updates
+
     status_container = st.status("🚀 Initializing research workflow...", expanded=True)
     col1, col2 = st.columns([1, 1])
 
@@ -89,7 +86,7 @@ if run_button and query:
 
     summaries_expander = st.expander("📚 Extracted Summaries", expanded=False)
 
-    # Streaming LangGraph Steps
+
     for output in app_graph.stream(initial_state, config={"recursion_limit": 40}):
         for node_name, state_update in output.items():
 
@@ -138,8 +135,6 @@ if run_button and query:
                 st.markdown(st.session_state.final_report)
 
 elif st.session_state.run_complete:
-    # A run already completed in a previous script execution (e.g. the user
-    # tweaked a sidebar widget) - redraw the last results instead of losing them.
     st.info("Showing results from the last completed run.")
 
     col1, col2 = st.columns([1, 1])
