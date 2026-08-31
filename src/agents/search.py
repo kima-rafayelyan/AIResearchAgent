@@ -3,11 +3,10 @@ from langgraph.prebuilt import ToolNode
 from src.state import ResearchState
 from src.agents import llm_with_tools, llm_with_tools_forced
 from src.tools import all_tools
-from src.utils import extract_text, extract_documents
+from src.utils import  extract_documents
 
 SEARCH_AGENT_PROMPT = """
 You are a Search Agent.
-
 Your job is to research the given topics by selecting and calling
 the most appropriate search tools.
 

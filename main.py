@@ -1,6 +1,6 @@
 import warnings
 warnings.filterwarnings("ignore")
-
+from src.config import MAX_SEARCH_ITERATIONS
 from src.state import ResearchState
 from src.graph import app_graph
 
@@ -19,6 +19,7 @@ def main():
         "review_feedback": "",
         "final_report": "",
         "search_count": 0,
+        "max_search_iterations": MAX_SEARCH_ITERATIONS,
     }
 
     result = app_graph.invoke(initial_state, config={"recursion_limit": 40})

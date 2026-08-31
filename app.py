@@ -72,7 +72,6 @@ if run_button and query:
         "max_search_iterations": max_iterations,
     }
 
-
     status_container = st.status("🚀 Initializing research workflow...", expanded=True)
     col1, col2 = st.columns([1, 1])
 
@@ -85,7 +84,6 @@ if run_button and query:
         metrics_box = st.empty()
 
     summaries_expander = st.expander("📚 Extracted Summaries", expanded=False)
-
 
     for output in app_graph.stream(initial_state, config={"recursion_limit": 40}):
         for node_name, state_update in output.items():
@@ -134,6 +132,9 @@ if run_button and query:
                 st.subheader("📄 Final Research Report")
                 st.markdown(st.session_state.final_report)
 
+elif run_button and not query:
+    st.warning("⚠️ Please enter a research query before starting.")
+
 elif st.session_state.run_complete:
     st.info("Showing results from the last completed run.")
 
@@ -161,5 +162,3 @@ elif st.session_state.run_complete:
     st.markdown("---")
     st.subheader("📄 Final Research Report")
     st.markdown(st.session_state.final_report or "No report generated.")
-
-

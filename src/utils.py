@@ -1,4 +1,6 @@
-from typing import Any
+import json
+from typing import List, Any
+from src.state import SourceDocument
 
 def extract_text(content: Any) -> str:
     if content is None:
@@ -20,10 +22,7 @@ def extract_text(content: Any) -> str:
 
     return str(content).strip()
     
-    
-import json
-from typing import List, Any
-from src.state import SourceDocument
+
 
 def extract_documents(content: Any, start_idx: int) -> List[SourceDocument]:
     docs = []

@@ -3,14 +3,14 @@ from typing import Annotated, List, TypedDict
 
 class SourceDocument(TypedDict):
     doc_id: str         
-    source_type: str     
+    source: str     
     title: str
     url: str
     content: str
 
 class DocumentSummary(TypedDict):
     doc_id: str
-    source_type: str
+    source: str
     title: str
     url: str
     summary: str
