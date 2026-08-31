@@ -5,7 +5,7 @@ from src.state import ResearchState
 from src.graph import app_graph
 
 def main():
-    query = input("Enter your research question: ")
+    query = input(" Enter your research question:  ")
 
     initial_state: ResearchState = {
         "query": query,
