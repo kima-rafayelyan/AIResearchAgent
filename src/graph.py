@@ -11,13 +11,14 @@ from src.agents.reporter import final_agent
 def quality_router(state: ResearchState) -> Literal["search", "final"]:
     search_count = state.get("search_count", 0)
     need_more_search = state.get("need_more_search", False)
+    max_iterations = state.get("max_search_iterations") or MAX_SEARCH_ITERATIONS
 
-    if need_more_search and search_count < MAX_SEARCH_ITERATIONS:
-        print(f"\n🔄 Iteration {search_count}/{MAX_SEARCH_ITERATIONS}: Additional research required. Returning to Search Agent.")
+    if need_more_search and search_count < max_iterations:
+        print(f"\n🔄 Iteration {search_count}/{max_iterations}: Additional research required. Returning to Search Agent.")
         return "search"
 
-    if search_count >= MAX_SEARCH_ITERATIONS and need_more_search:
-        print(f"\n⚠️ Search cap reached ({MAX_SEARCH_ITERATIONS} iterations). Proceeding directly to Final Report.")
+    if search_count >= max_iterations and need_more_search:
+        print(f"\n⚠️ Search cap reached ({max_iterations} iterations). Proceeding directly to Final Report.")
 
     return "final"
 
