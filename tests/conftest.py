@@ -1,11 +1,10 @@
 import os
+import pytest
 
 os.environ.setdefault("OPENROUTER_API_KEY", "test-openrouter-key")
 os.environ.setdefault("OPENROUTER_MODEL", "test-model")
 os.environ.setdefault("TAVILY_API_KEY", "test-tavily-key")
 
-
-import pytest
 
 
 @pytest.fixture
