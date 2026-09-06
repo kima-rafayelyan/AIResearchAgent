@@ -1,6 +1,7 @@
-from src.state import ResearchState
-from src.schemas import ResearchPlan
 from src.agents import llm
+from src.schemas import ResearchPlan
+from src.state import ResearchState
+
 
 def research_agent(state: ResearchState) -> dict:
     prompt = f"""
@@ -32,7 +33,9 @@ def research_agent(state: ResearchState) -> dict:
             print(f"\n⚠ Planner call failed (attempt {attempt + 1}/2): {e}")
 
     if not topics:
-        print(f"\n❌ Planner failed after retries, falling back to the raw query as the only topic: {last_error}")
+        print(
+            f"\n❌ Planner failed after retries, falling back to the raw query as the only topic: {last_error}"
+        )
         topics = [state["query"]]
 
     print("\nResearch plan:")

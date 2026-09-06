@@ -1,8 +1,10 @@
 import warnings
+
 warnings.filterwarnings("ignore")
 from src.config import MAX_SEARCH_ITERATIONS
-from src.state import ResearchState
 from src.graph import app_graph
+from src.state import ResearchState
+
 
 def main():
     query = input(" Enter your research question:  ")
@@ -28,6 +30,7 @@ def main():
     print("FINAL REPORT")
     print("=" * 60)
     print(result["final_report"])
+
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,9 @@
 import json
-from src.state import ResearchState
-from src.schemas import QualityReview
+
 from src.agents import llm
+from src.schemas import QualityReview
+from src.state import ResearchState
+
 
 def quality_reviewer(state: ResearchState) -> dict:
     query = state["query"]

@@ -1,9 +1,10 @@
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from langgraph.prebuilt import ToolNode
-from src.state import ResearchState
+
 from src.agents import llm_with_tools, llm_with_tools_forced
+from src.state import ResearchState
 from src.tools import all_tools
-from src.utils import  extract_documents
+from src.utils import extract_documents
 
 SEARCH_AGENT_PROMPT = """
 You are a Search Agent.
@@ -46,6 +47,7 @@ tool_node = ToolNode(all_tools)
 
 MAX_REACT_STEPS = 4
 
+
 def search_agent(state: ResearchState) -> dict:
     current_search_count = state.get("search_count", 0) + 1
     existing_docs_count = len(state.get("documents", []))
@@ -62,7 +64,6 @@ def search_agent(state: ResearchState) -> dict:
     counter = existing_docs_count
 
     for step in range(MAX_REACT_STEPS):
-
         model = llm_with_tools_forced if step == 0 else llm_with_tools
         response = model.invoke(messages)
         messages.append(response)
@@ -73,7 +74,9 @@ def search_agent(state: ResearchState) -> dict:
                 for t in topics:
                     print(f"  - {t}")
             else:
-                print(f"\n✓ Search Agent stopped after {step} round(s) of tool calls (model judged coverage sufficient).")
+                print(
+                    f"\n✓ Search Agent stopped after {step} round(s) of tool calls (model judged coverage sufficient)."
+                )
             break
 
         tool_result = tool_node.invoke({"messages": messages})
@@ -88,9 +91,13 @@ def search_agent(state: ResearchState) -> dict:
                 step_doc_count += len(extracted)
                 new_documents.extend(extracted)
 
-        print(f"  Round {step + 1}/{MAX_REACT_STEPS}: {len(tool_messages)} tool call(s) -> {step_doc_count} document(s)")
+        print(
+            f"  Round {step + 1}/{MAX_REACT_STEPS}: {len(tool_messages)} tool call(s) -> {step_doc_count} document(s)"
+        )
     else:
-        print(f"\n⚠ Search Agent hit the {MAX_REACT_STEPS}-round cap; stopping with what's been gathered so far.")
+        print(
+            f"\n⚠ Search Agent hit the {MAX_REACT_STEPS}-round cap; stopping with what's been gathered so far."
+        )
 
     return {
         "documents": new_documents,

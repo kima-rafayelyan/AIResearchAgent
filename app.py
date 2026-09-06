@@ -1,12 +1,9 @@
 import streamlit as st
-from src.state import ResearchState
-from src.graph import app_graph
 
-st.set_page_config(
-    page_title="AI Research Agent",
-    page_icon="🔍",
-    layout="wide"
-)
+from src.graph import app_graph
+from src.state import ResearchState
+
+st.set_page_config(page_title="AI Research Agent", page_icon="🔍", layout="wide")
 
 st.title("🔍 Multi-Agent Deep Research System")
 st.caption("Powered by LangGraph, Google Gemini, Tavily, Wikipedia & ArXiv")
@@ -33,7 +30,7 @@ with st.sidebar:
 
 query = st.text_input(
     "Enter your research query:",
-    placeholder="e.g., Explain the architecture and capabilities of DeepSeek-V3"
+    placeholder="e.g., Explain the architecture and capabilities of DeepSeek-V3",
 )
 
 run_button = st.button("Start Research", type="primary", use_container_width=True)
@@ -87,7 +84,6 @@ if run_button and query:
 
     for output in app_graph.stream(initial_state, config={"recursion_limit": 40}):
         for node_name, state_update in output.items():
-
             if node_name == "research":
                 status_container.write("💡 **Planner Agent**: Subtopics generated.")
                 topics = state_update.get("topics", [])
@@ -96,10 +92,14 @@ if run_button and query:
 
             elif node_name == "search":
                 count = state_update.get("search_count", 1)
-                status_container.write(f"🔎 **Search Agent (Iteration {count})**: Querying web, arXiv, & Wikipedia...")
+                status_container.write(
+                    f"🔎 **Search Agent (Iteration {count})**: Querying web, arXiv, & Wikipedia..."
+                )
 
             elif node_name == "analyze":
-                status_container.write("⚡ **Analyzer Agent**: Processing & summarizing retrieved documents...")
+                status_container.write(
+                    "⚡ **Analyzer Agent**: Processing & summarizing retrieved documents..."
+                )
                 if "summaries" in state_update:
                     st.session_state.summaries.extend(state_update["summaries"])
                     with summaries_expander:
@@ -107,11 +107,17 @@ if run_button and query:
                             st.info(s)
 
             elif node_name == "review":
-                status_container.write("⚖️ **Quality Reviewer**: Evaluating coverage and quality score...")
+                status_container.write(
+                    "⚖️ **Quality Reviewer**: Evaluating coverage and quality score..."
+                )
                 score = state_update.get("quality_score", 0.0)
                 need_more = state_update.get("need_more_search", False)
                 missing = state_update.get("missing_topics", [])
-                st.session_state.review = {"score": score, "need_more": need_more, "missing": missing}
+                st.session_state.review = {
+                    "score": score,
+                    "need_more": need_more,
+                    "missing": missing,
+                }
 
                 with metrics_box.container():
                     m1, m2 = st.columns(2)
@@ -119,13 +125,20 @@ if run_button and query:
                     m2.metric("Needs More Search", "Yes" if need_more else "No")
 
                     if missing:
-                        st.warning(f"**Missing Topics Identified:**\n" + "\n".join([f"- {m}" for m in missing]))
+                        st.warning(
+                            "**Missing Topics Identified:**\n"
+                            + "\n".join([f"- {m}" for m in missing])
+                        )
 
             elif node_name == "final":
                 status_container.write("📝 **Reporter Agent**: Drafting final research report...")
-                status_container.update(label="✅ Research Complete!", state="complete", expanded=False)
+                status_container.update(
+                    label="✅ Research Complete!", state="complete", expanded=False
+                )
 
-                st.session_state.final_report = state_update.get("final_report", "No report generated.")
+                st.session_state.final_report = state_update.get(
+                    "final_report", "No report generated."
+                )
                 st.session_state.run_complete = True
 
                 st.markdown("---")

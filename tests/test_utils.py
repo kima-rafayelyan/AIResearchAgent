@@ -28,19 +28,24 @@ def test_extract_text_mixed_and_malformed_input():
     assert extract_text(content) == "plain\ndict-text"
 
 
-
-
-
 def test_extract_document_valid_json_list():
     content = json.dumps([{"title": "A", "url": "http://a", "content": "body a"}])
     docs = extract_documents(content, 0)
     assert docs == [
-        {"doc_id": "doc_1", "title": "A", "url": "http://a", "source": "Web Search", "content": "body a"}
+        {
+            "doc_id": "doc_1",
+            "title": "A",
+            "url": "http://a",
+            "source": "Web Search",
+            "content": "body a",
+        }
     ]
 
 
 def test_extract_document_tavily_results():
-    content = json.dumps({"results": [{"title": "A", "content": "a"}, {"title": "B", "content": "b"}]})
+    content = json.dumps(
+        {"results": [{"title": "A", "content": "a"}, {"title": "B", "content": "b"}]}
+    )
     docs = extract_documents(content, 0)
     assert [d["doc_id"] for d in docs] == ["doc_1", "doc_2"]
     assert [d["title"] for d in docs] == ["A", "B"]
@@ -62,7 +67,13 @@ def test_extract_document_malformed_json():
     content = "this is not valid json {{{"
     docs = extract_documents(content, 0)
     assert docs == [
-        {"doc_id": "doc_1", "title": "Web Source 1", "url": "N/A", "source": "Web", "content": content}
+        {
+            "doc_id": "doc_1",
+            "title": "Web Source 1",
+            "url": "N/A",
+            "source": "Web",
+            "content": content,
+        }
     ]
 
 

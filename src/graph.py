@@ -1,12 +1,15 @@
 from typing import Literal
+
 from langgraph.graph import END, START, StateGraph
-from src.state import ResearchState
-from src.config import MAX_SEARCH_ITERATIONS
-from src.agents.planner import research_agent
-from src.agents.search import search_agent
+
 from src.agents.analyzer import document_analyzer
-from src.agents.reviewer import quality_reviewer
+from src.agents.planner import research_agent
 from src.agents.reporter import final_agent
+from src.agents.reviewer import quality_reviewer
+from src.agents.search import search_agent
+from src.config import MAX_SEARCH_ITERATIONS
+from src.state import ResearchState
+
 
 def quality_router(state: ResearchState) -> Literal["search", "final"]:
     search_count = state.get("search_count", 0)
@@ -14,13 +17,18 @@ def quality_router(state: ResearchState) -> Literal["search", "final"]:
     max_iterations = state.get("max_search_iterations") or MAX_SEARCH_ITERATIONS
 
     if need_more_search and search_count < max_iterations:
-        print(f"\n🔄 Iteration {search_count}/{max_iterations}: Additional research required. Returning to Search Agent.")
+        print(
+            f"\n🔄 Iteration {search_count}/{max_iterations}: Additional research required. Returning to Search Agent."
+        )
         return "search"
 
     if search_count >= max_iterations and need_more_search:
-        print(f"\n⚠️ Search cap reached ({max_iterations} iterations). Proceeding directly to Final Report.")
+        print(
+            f"\n⚠️ Search cap reached ({max_iterations} iterations). Proceeding directly to Final Report."
+        )
 
     return "final"
+
 
 def build_graph():
     graph_builder = StateGraph(ResearchState)
@@ -48,5 +56,6 @@ def build_graph():
     graph_builder.add_edge("final", END)
 
     return graph_builder.compile()
+
 
 app_graph = build_graph()

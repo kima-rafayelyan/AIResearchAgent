@@ -1,6 +1,8 @@
 import json
 from unittest.mock import patch
+
 from langchain_core.messages import AIMessage, ToolMessage
+
 from src.graph import build_graph
 from src.schemas import QualityReview, ResearchPlan
 
@@ -104,24 +106,19 @@ def test_graph_runs_with_tool_results(
         review_feedback="Sufficient coverage from one search round.",
     )
 
-    mock_reporter.invoke.return_value = AIMessage(
-        content="# Report With Real Search Path\n\nDone."
-    )
+    mock_reporter.invoke.return_value = AIMessage(content="# Report With Real Search Path\n\nDone.")
 
     graph = build_graph()
     result = graph.invoke(base_state, config={"recursion_limit": 40})
-
 
     assert len(result["documents"]) == 1
     assert result["documents"][0]["title"] == "Retrieval-Augmented Generation"
     assert "ground outputs" in result["documents"][0]["content"]
 
-
     assert len(result["summaries"]) == 1
     assert result["summaries"][0]["summary"] == "Fake document summary."
 
     assert result["final_report"] == "# Report With Real Search Path\n\nDone."
-
 
     assert mock_tool_node.invoke.called
     assert mock_analyzer.invoke.called

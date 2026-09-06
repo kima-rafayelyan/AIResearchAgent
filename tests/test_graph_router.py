@@ -1,4 +1,3 @@
-from src.config import MAX_SEARCH_ITERATIONS
 from src.graph import quality_router
 
 
@@ -36,6 +35,3 @@ def test_does_not_need_more_search_goes_to_final():
         "max_search_iterations": 5,
     }
     assert quality_router(state) == "final"
-
-
-
