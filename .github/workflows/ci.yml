@@ -10,22 +10,18 @@ jobs:
   lint-and-test:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
 
     steps:
-      - name: Check out repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-          cache-dependency-path: |
-            requirements.txt
-            requirements-dev.txt
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -36,5 +32,5 @@ jobs:
       - name: Lint with ruff
         run: ruff check .
 
-      - name: Run tests
+      - name: Run tests with pytest
         run: python -m pytest
