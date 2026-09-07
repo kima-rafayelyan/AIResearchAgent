@@ -1,10 +1,10 @@
 import warnings
 
-warnings.filterwarnings("ignore")
 from src.config import MAX_SEARCH_ITERATIONS
 from src.graph import app_graph
 from src.state import ResearchState
 
+warnings.filterwarnings("ignore")
 
 def main():
     query = input(" Enter your research question:  ")
