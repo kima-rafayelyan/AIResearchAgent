@@ -1,7 +1,9 @@
 import json
-from src.state import ResearchState
+
 from src.agents import llm
+from src.state import ResearchState
 from src.utils import extract_text
+
 
 def final_agent(state: ResearchState) -> dict:
     query = state["query"]

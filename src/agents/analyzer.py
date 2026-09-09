@@ -1,7 +1,8 @@
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Optional
-from src.state import ResearchState
+
 from src.agents import llm
+from src.state import ResearchState
 from src.utils import extract_text
 
 
@@ -64,9 +65,7 @@ def document_analyzer(state: ResearchState) -> dict:
     print(f"\nAnalyzing {len(documents)} new documents in parallel...")
 
     with ThreadPoolExecutor(max_workers=min(len(documents), 10)) as executor:
-        results = list(
-            executor.map(summarize_doc, enumerate(documents, start=1))
-        )
+        results = list(executor.map(summarize_doc, enumerate(documents, start=1)))
 
     new_summaries = [res for res in results if res is not None]
     return {"summaries": new_summaries}

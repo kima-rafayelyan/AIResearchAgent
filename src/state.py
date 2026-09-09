@@ -1,12 +1,14 @@
 import operator
 from typing import Annotated, List, TypedDict
 
+
 class SourceDocument(TypedDict):
-    doc_id: str         
-    source: str     
+    doc_id: str
+    source: str
     title: str
     url: str
     content: str
+
 
 class DocumentSummary(TypedDict):
     doc_id: str
@@ -14,7 +16,7 @@ class DocumentSummary(TypedDict):
     title: str
     url: str
     summary: str
-    
+
 
 class ResearchState(TypedDict):
     query: str
