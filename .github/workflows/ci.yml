@@ -12,7 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        # Lockfiles are compiled with Python 3.12; keep CI on the same interpreter.
+        python-version: ["3.12"]
 
     steps:
       - name: Check out repository
