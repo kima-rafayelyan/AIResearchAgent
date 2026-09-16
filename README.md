@@ -103,6 +103,27 @@ AIResearchAgent/
         ├── reviewer.py       # Quality Reviewer — scores & routes
         └── reporter.py       # Final Reporter — writes the cited report
 ```
+## Dependency management
+
+Dependencies are declared in `requirements.in` / `requirements-dev.in` and pinned into `requirements.txt` / `requirements-dev.txt` via [pip-tools](https://github.com/jazzband/pip-tools). Lockfiles are compiled with **Python 3.12** to match the project's target and CI environment — don't regenerate them with a different interpreter, as resolved versions can differ across Python versions.
+
+Install (runtime only):
+```bash
+pip install -r requirements.txt
+```
+
+Install (with dev tools, e.g. pytest/ruff):
+```bash
+pip install -r requirements-dev.txt
+```
+
+Recompile the lockfiles after changing an `.in` file:
+```bash
+pip install pip-tools
+pip-compile --output-file=requirements.txt requirements.in
+pip-compile --output-file=requirements-dev.txt requirements-dev.in
+```
+
 
 ## Configuration notes
 
