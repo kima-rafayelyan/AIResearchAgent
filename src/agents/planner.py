@@ -14,9 +14,9 @@ def research_agent(state: ResearchState) -> dict:
     - Avoid unnecessary overlap.
     - Be independently researchable.
     - Together provide comprehensive coverage.
-    
+
      USER QUESTION: {state["query"]}
-    
+
      Return ONLY a JSON array of strings.
     """
     planner_llm = llm.with_structured_output(ResearchPlan)
